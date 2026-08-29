@@ -1,0 +1,18 @@
+node_modules
+dist
+
+# WASM de MediaPipe: lo copia `scripts/copiar-wasm.mjs` en postinstall desde node_modules.
+# Son 32 MB generados a partir de una dependencia; versionarlos no aporta nada.
+# Vive fuera de `public/` para que no acabe en `dist`: el sitio publicado no llega a pedirlo.
+vendor/
+# Modelos de origen sin procesar, de los que se extrajeron las piezas que sí se usan.
+# Son 57 MB que no hacen falta para compilar ni ejecutar: quedarían en el historial de git para
+# siempre y GitHub avisa por encima de 50 MB por fichero. Su procedencia está documentada en
+# `public/assets/instruments/README.md`, así que se pueden volver a bajar si hiciera falta.
+assets-originales/
+
+*.local
+.DS_Store
+.vscode
+.playwright-mcp
+*.png

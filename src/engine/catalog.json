@@ -1,0 +1,54 @@
+{
+  "instruments": [
+    { "id": "scalpel-3", "name": "Mango de bisturí nº3", "category": "corte", "placeholderColor": "#c7ccd1", "description": "Mango para hojas del nº10 al 15.", "glb": "assets/instruments/surgical_instrument.glb", "glbPart": 2, "credit": { "author": "ferofluid", "license": "CC BY 4.0", "url": "https://sketchfab.com/3d-models/surgical-instrument-2971a44d334b45ff926792e92a6bcee7" } },
+    { "id": "blade-10", "name": "Hoja de bisturí nº10", "category": "corte", "placeholderColor": "#dfe4e8", "description": "Hoja curva para incisión de piel." },
+    { "id": "mayo-scissors", "name": "Tijera de Mayo", "category": "corte", "placeholderColor": "#b9c0c7", "description": "Corte de tejidos resistentes y suturas.", "glb": "assets/instruments/surgical_instrument.glb", "glbPart": 0, "credit": { "author": "ferofluid", "license": "CC BY 4.0", "url": "https://sketchfab.com/3d-models/surgical-instrument-2971a44d334b45ff926792e92a6bcee7" } },
+    { "id": "metzenbaum-scissors", "name": "Tijera de Metzenbaum", "category": "corte", "placeholderColor": "#aeb6bd", "description": "Disección fina de tejidos delicados.", "glb": "assets/instruments/surgical_instrument.glb", "glbPart": 3, "credit": { "author": "ferofluid", "license": "CC BY 4.0", "url": "https://sketchfab.com/3d-models/surgical-instrument-2971a44d334b45ff926792e92a6bcee7" } },
+    { "id": "kelly-forceps", "name": "Pinza de Kelly", "category": "pinza", "placeholderColor": "#9aa3ab", "description": "Hemostasia, clampaje de vasos.", "glb": "assets/instruments/medical_forceps.glb", "credit": { "author": "Fhay.Alonso", "license": "CC BY 4.0", "url": "https://sketchfab.com/3d-models/medical-forceps-46e4d6704bcb42d0a0ea907275e3c780" } },
+    { "id": "mosquito-forceps", "name": "Pinza mosquito", "category": "pinza", "placeholderColor": "#8f99a1", "description": "Hemostasia de vasos pequeños.", "glb": "assets/instruments/surgical_instrument.glb", "glbPart": 1, "credit": { "author": "ferofluid", "license": "CC BY 4.0", "url": "https://sketchfab.com/3d-models/surgical-instrument-2971a44d334b45ff926792e92a6bcee7" } },
+    { "id": "adson-forceps", "name": "Pinza de Adson", "category": "pinza", "placeholderColor": "#a7afb6", "description": "Sujeción de tejido con dientes finos.", "glb": "assets/instruments/surgical_instrument.glb", "glbPart": 6, "credit": { "author": "ferofluid", "license": "CC BY 4.0", "url": "https://sketchfab.com/3d-models/surgical-instrument-2971a44d334b45ff926792e92a6bcee7" } },
+    { "id": "babcock-forceps", "name": "Pinza de Babcock", "category": "pinza", "placeholderColor": "#96a0a8", "description": "Sujeción atraumática de vísceras." },
+    { "id": "needle-holder", "name": "Portaagujas", "category": "sutura", "placeholderColor": "#c2b280", "description": "Sujeta la aguja durante la sutura.", "glb": "assets/instruments/wenschel_hemostat.glb", "credit": { "author": "Wenschel (pieza extraída y remasterizada)", "license": "CC BY 4.0", "url": "https://sketchfab.com/3d-models/surgical-instruments-bd0ad0180f5148f1b3b331b8ebe6e494" } },
+    { "id": "suture-silk", "name": "Sutura de seda", "category": "sutura", "placeholderColor": "#3a3a3a", "description": "Hilo de sutura no absorbible." },
+    { "id": "suture-vicryl", "name": "Sutura Vicryl", "category": "sutura", "placeholderColor": "#8e44ad", "description": "Hilo de sutura absorbible." },
+    { "id": "retractor-farabeuf", "name": "Separador de Farabeuf", "category": "separador", "placeholderColor": "#b0b8bf", "description": "Separación superficial de bordes.", "glb": "assets/instruments/coupland_elevator.glb", "credit": { "author": "SDEO", "license": "CC BY 4.0", "url": "https://sketchfab.com/3d-models/coupland-elevator-4578b63ca7bb445fa2f93919a58f7856" } },
+    { "id": "retractor-deaver", "name": "Separador de Deaver", "category": "separador", "placeholderColor": "#a3abb2", "description": "Separación profunda de vísceras." },
+    { "id": "gauze", "name": "Gasa", "category": "consumible", "placeholderColor": "#f2f2ea", "description": "Absorción y limpieza del campo." },
+    { "id": "suction-yankauer", "name": "Aspirador de Yankauer", "category": "aspiracion", "placeholderColor": "#d9dde1", "description": "Aspiración de fluidos del campo." },
+    { "id": "towel-clamp", "name": "Pinza de campo (Backhaus)", "category": "fijacion", "placeholderColor": "#9299a0", "description": "Fija los paños quirúrgicos." },
+    { "id": "electrocautery", "name": "Electrobisturí", "category": "corte", "placeholderColor": "#e6c34a", "description": "Corte y coagulación por electricidad." },
+    { "id": "bone-saw", "name": "Sierra ósea", "category": "traumatologia", "placeholderColor": "#c0c6cc", "description": "Corte de hueso (no usar en abdomen).", "glb": "assets/instruments/surgical_saw.glb", "credit": { "author": "normal|studio", "license": "CC BY 4.0", "url": "https://sketchfab.com/3d-models/surgical-saw-14fc8a0f46144779bb038e881e072f47" } }
+  ],
+  "operations": [
+    {
+      "id": "appendectomy",
+      "name": "Apendicectomía",
+      "level": 3,
+      "specialty": "Cirugía general",
+      "briefing": "Extirpación del apéndice. Prepara la mesa básica de laparotomía.",
+      "required": ["scalpel-3", "blade-10", "mayo-scissors", "metzenbaum-scissors", "kelly-forceps", "babcock-forceps", "needle-holder", "suture-vicryl", "retractor-farabeuf", "gauze", "suction-yankauer"],
+      "optional": ["adson-forceps", "electrocautery", "towel-clamp"],
+      "distractors": ["bone-saw", "retractor-deaver"]
+    },
+    {
+      "id": "cholecystectomy",
+      "name": "Colecistectomía",
+      "level": 2,
+      "specialty": "Cirugía general",
+      "briefing": "Extirpación de la vesícula biliar. Requiere buena exposición hepática.",
+      "required": ["scalpel-3", "blade-10", "metzenbaum-scissors", "kelly-forceps", "mosquito-forceps", "needle-holder", "suture-silk", "retractor-deaver", "gauze", "suction-yankauer", "electrocautery"],
+      "optional": ["babcock-forceps", "adson-forceps"],
+      "distractors": ["bone-saw", "mayo-scissors"]
+    },
+    {
+      "id": "skin-suture",
+      "name": "Sutura de herida cutánea",
+      "level": 1,
+      "specialty": "Cirugía menor",
+      "briefing": "Cierre de una herida simple. Mesa mínima de sutura.",
+      "required": ["needle-holder", "adson-forceps", "mayo-scissors", "suture-silk", "gauze"],
+      "optional": ["scalpel-3", "blade-10"],
+      "distractors": ["bone-saw", "retractor-deaver", "suction-yankauer"]
+    }
+  ]
+}

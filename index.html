@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <!-- Emoji en SVG: evita el 404 de /favicon.ico sin añadir un fichero binario al repositorio. -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>"
+    />
+    <meta
+      name="description"
+      content="Simulador de quirófano en el navegador: prepara la mesa del instrumentista con las manos (webcam) o el ratón."
+    />
+    <title>Simulador de Quirófano · Mesa del Instrumentista</title>
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="scene"></canvas>
+      <video id="webcam" playsinline muted></video>
+      <div id="hud"></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

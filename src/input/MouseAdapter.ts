@@ -27,6 +27,16 @@ export class MouseAdapter {
     this.el.addEventListener('pointermove', this.handleMove);
     this.el.addEventListener('pointerdown', this.handleDown);
     window.addEventListener('pointerup', this.handleUp);
+    /*
+     * `pointercancel` suelta igual que `pointerup`. NO es redundante: es la diferencia entre un ratón
+     * y un dedo.
+     *
+     * Cuando el sistema se queda con el gesto —una deslizada desde el borde, una notificación, una
+     * llamada— el navegador manda `pointercancel` y `pointerup` NO llega nunca. Sin escucharlo, la
+     * pinza se queda cerrada para siempre y el instrumento agarrado no se suelta ni levantando el
+     * dedo: hay que recargar. Con ratón no pasa porque el botón siempre acaba soltándose.
+     */
+    window.addEventListener('pointercancel', this.handleUp);
   }
 
   stop(): void {
@@ -34,6 +44,7 @@ export class MouseAdapter {
     this.el.removeEventListener('pointermove', this.handleMove);
     this.el.removeEventListener('pointerdown', this.handleDown);
     window.removeEventListener('pointerup', this.handleUp);
+    window.removeEventListener('pointercancel', this.handleUp);
     this.onUpdate(null);
   }
 

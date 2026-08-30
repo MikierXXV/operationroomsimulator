@@ -8,6 +8,7 @@ import { buildOperatingRoom, loadOperatingRoom, type RoomLoadResult } from './ro
 import {
   assertLayout,
   CAMERA,
+  CONSULTA_PANEL_ABAJO,
   contentBounds,
   framingPoints,
   HAND_LENGTH,
@@ -103,6 +104,8 @@ export class SceneManager implements ISceneApi {
   private salaCargada: RoomLoadResult | null = null;
   /** Carga en curso del quirófano; `null` resuelto si no hay modelo. */
   private cargaSala: Promise<RoomLoadResult | null> = Promise.resolve(null);
+  /** Cierto si el área jugable no cupo en la ventana ni abriendo el ángulo hasta el tope. */
+  private encuadreRecortado = false;
   /** Estado del plano de apertura. */
   private introActivo = false;
   /**
@@ -1231,7 +1234,12 @@ export class SceneManager implements ISceneApi {
    *
    * El panel del HUD entra en la cuenta: la franja derecha que ocupa se descuenta del espacio
    * disponible, así que «el contenido no queda debajo del panel» pasa de ajuste a ojo a resultado
-   * calculado. Por debajo de 640 px el CSS baja el panel y esa reserva desaparece.
+   * calculado. Cuando el panel baja a la franja inferior esa reserva desaparece, y de saber cuándo
+   * ocurre se encarga `CONSULTA_PANEL_ABAJO`, que es la MISMA consulta que aplica el CSS.
+   *
+   * Si ni abriendo hasta el tope cabe todo, se anota en `encuadreRecortado`. Eso no se puede
+   * arreglar con más ángulo —la mesa mide 3,2 m y una pantalla vertical no tiene dónde ponerla— así
+   * que quien lo consulte pide girar el dispositivo.
    */
   private fitCamera(): void {
     const camPos = new THREE.Vector3(...CAMERA.position);
@@ -1239,7 +1247,8 @@ export class SceneManager implements ISceneApi {
     const right = new THREE.Vector3().crossVectors(fwd, new THREE.Vector3(0, 1, 0)).normalize();
     const up = new THREE.Vector3().crossVectors(right, fwd).normalize();
 
-    const reservaPanel = window.innerWidth <= 640 ? 0 : CAMERA.hudReserveX;
+    const panelAbajo = window.matchMedia?.(CONSULTA_PANEL_ABAJO).matches ?? false;
+    const reservaPanel = panelAbajo ? 0 : CAMERA.hudReserveX;
     const limDer = 1 - 2 * (reservaPanel + CAMERA.margin);
     const limIzq = 1 - 2 * CAMERA.margin;
     const limArr = 1 - 2 * CAMERA.topReserve;
@@ -1261,6 +1270,21 @@ export class SceneManager implements ISceneApi {
     const fov = (2 * Math.atan(tan) * 180) / Math.PI;
     this.camera.fov = Math.min(CAMERA.maxFovDeg, Math.max(CAMERA.baseFovDeg, fov));
     this.camera.updateProjectionMatrix();
+
+    // Un pelín de holgura: pedía 62,0001 grados y decir que no cabe sería quisquilloso.
+    this.encuadreRecortado = fov > CAMERA.maxFovDeg + 0.01;
+  }
+
+  /**
+   * ¿Se ha quedado área jugable fuera de la pantalla?
+   *
+   * Cierto cuando `fitCamera()` ha tenido que recortar el ángulo contra su tope, que es exactamente
+   * la condición en la que parte de la mesa no entra. Se expone como una PREGUNTA sobre el encuadre y
+   * no como «¿es un móvil?» a propósito: lo que estropea la partida es la proporción de la ventana,
+   * no el aparato, y una ventana de escritorio estrecha y alta se rompe igual.
+   */
+  encuadreCompleto(): boolean {
+    return !this.encuadreRecortado;
   }
 
   /** Proyecta un instrumento a coordenadas de pantalla (px CSS). Para tests. */

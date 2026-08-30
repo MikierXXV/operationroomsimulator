@@ -58,6 +58,90 @@ describe('OperationEngine.evaluate', () => {
   });
 });
 
+/*
+ * El cronómetro se puntúa y se guarda en el historial, así que pararlo mal se nota en la marca del
+ * jugador. Existe porque el aviso de girar el dispositivo tapa la partida: si el reloj siguiera
+ * corriendo por debajo, girar el teléfono a mitad de nivel arruinaría el tiempo.
+ */
+describe('OperationEngine · pausa del cronómetro', () => {
+  /**
+   * Motor con un reloj de mentira, para no depender de lo que tarde la máquina.
+   *
+   * Arranca en un instante realista y NO en cero: `getElapsedMs()` se guarda con `!this.startedAt`,
+   * así que un origen de 0 lo lee como «aún no ha empezado» y devuelve 0. Con `Date.now()` eso no
+   * puede ocurrir —sería el 1 de enero de 1970— pero un reloj inyectado sí puede caer ahí.
+   */
+  function motorConReloj() {
+    let ahora = 1_700_000_000_000;
+    const engine = new OperationEngine({ onStateChange: () => {} }, catalog, () => ahora);
+    return { engine, avanzar: (ms: number) => { ahora += ms; } };
+  }
+
+  it('el tiempo no avanza mientras está parado', () => {
+    const { engine, avanzar } = motorConReloj();
+    engine.selectOperation('test-op');
+    avanzar(1000);
+    engine.pausarReloj();
+    avanzar(5000);
+    expect(engine.getElapsedMs()).toBe(1000);
+  });
+
+  it('al reanudar se descuenta la pausa entera', () => {
+    const { engine, avanzar } = motorConReloj();
+    engine.selectOperation('test-op');
+    avanzar(1000);
+    engine.pausarReloj();
+    avanzar(5000);
+    engine.reanudarReloj();
+    avanzar(500);
+    // 1000 antes + 500 después. Los 5000 de pausa no cuentan.
+    expect(engine.getElapsedMs()).toBe(1500);
+  });
+
+  it('pausar dos veces seguidas no regala tiempo', () => {
+    const { engine, avanzar } = motorConReloj();
+    engine.selectOperation('test-op');
+    avanzar(1000);
+    engine.pausarReloj();
+    avanzar(3000);
+    engine.pausarReloj(); // la segunda no debe mover el instante de la pausa
+    avanzar(3000);
+    engine.reanudarReloj();
+    expect(engine.getElapsedMs()).toBe(1000);
+  });
+
+  it('reanudar sin haber pausado no altera el reloj', () => {
+    const { engine, avanzar } = motorConReloj();
+    engine.selectOperation('test-op');
+    avanzar(1000);
+    engine.reanudarReloj();
+    expect(engine.getElapsedMs()).toBe(1000);
+  });
+
+  it('empezar un nivel con el reloj parado lo deja corriendo', () => {
+    const { engine, avanzar } = motorConReloj();
+    engine.selectOperation('test-op');
+    engine.pausarReloj();
+    avanzar(4000);
+    // Elegir nivel es empezar de cero: una pausa pendiente dejaría el cronómetro clavado en 0.
+    engine.selectOperation('test-op');
+    avanzar(700);
+    expect(engine.relojParado()).toBe(false);
+    expect(engine.getElapsedMs()).toBe(700);
+  });
+
+  it('reset con el reloj parado también lo deja corriendo', () => {
+    const { engine, avanzar } = motorConReloj();
+    engine.selectOperation('test-op');
+    engine.pausarReloj();
+    avanzar(4000);
+    engine.reset();
+    avanzar(300);
+    expect(engine.relojParado()).toBe(false);
+    expect(engine.getElapsedMs()).toBe(300);
+  });
+});
+
 describe('OperationEngine flujo de estado', () => {
   it('emite transiciones menu -> preparing -> result', () => {
     const onStateChange = vi.fn();

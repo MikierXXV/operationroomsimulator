@@ -19,6 +19,8 @@ export class OperationEngine {
   private events: EngineEvents;
   /** Instante en que arrancó la preparación en curso, para cronometrarla. */
   private startedAt = 0;
+  /** Instante en que se paró el reloj, o `0` si está corriendo. Ver `pausarReloj()`. */
+  private pausadoEn = 0;
   /** Veces que se ha puntuado la operación en curso. Se reinicia al elegirla o al vaciarla. */
   private attempts = 0;
   /** Reloj inyectable: los tests no pueden depender de lo que tarde la máquina. */
@@ -47,7 +49,38 @@ export class OperationEngine {
   /** Milisegundos transcurridos desde que empezó la preparación (0 fuera de ella). */
   getElapsedMs(): number {
     if (this.state.phase !== 'preparing' || !this.startedAt) return 0;
-    return this.now() - this.startedAt;
+    // Con el reloj parado cuenta hasta el instante de la pausa, no hasta ahora.
+    return (this.pausadoEn || this.now()) - this.startedAt;
+  }
+
+  /**
+   * Para el cronómetro mientras no se puede jugar.
+   *
+   * Existe por el aviso de girar el dispositivo: al ponerse en vertical el área jugable no cabe y la
+   * partida queda tapada, pero el reloj es de pared —`now() - startedAt`— así que seguiría corriendo
+   * y arruinaría un tiempo que se puntúa y se guarda en el historial.
+   *
+   * OJO, no confundir con `resume()`: aquel vuelve del resultado a corregir la mesa y conserva el
+   * reloj A PROPÓSITO, para que validar a lo loco no salga gratis. Este otro es el par de
+   * `reanudarReloj()` y no altera la fase.
+   */
+  pausarReloj(): void {
+    if (this.pausadoEn) return; // ya parado: volver a llamar no debe regalar tiempo
+    this.pausadoEn = this.now();
+  }
+
+  /** Reanuda el cronómetro descontando lo que ha durado la pausa. */
+  reanudarReloj(): void {
+    if (!this.pausadoEn) return;
+    // Se desplaza el origen en lugar de acumular en un contador aparte: así `getElapsedMs()` sigue
+    // siendo una resta y no hay dos fuentes de verdad para el mismo tiempo.
+    this.startedAt += this.now() - this.pausadoEn;
+    this.pausadoEn = 0;
+  }
+
+  /** Para los tests y para que el HUD no muestre el cronómetro corriendo si está parado. */
+  relojParado(): boolean {
+    return this.pausadoEn !== 0;
   }
 
   /**
@@ -127,6 +160,8 @@ export class OperationEngine {
     if (!operation) return;
     this.state = { phase: 'preparing', operation, tray: [], result: null };
     this.startedAt = this.now();
+    // Una pausa pendiente no puede sobrevivir a empezar de nuevo: dejaría el reloj congelado en 0.
+    this.pausadoEn = 0;
     this.attempts = 0;
     this.emit();
   }
@@ -193,6 +228,7 @@ export class OperationEngine {
       // el tiempo del primero y sería imposible mejorar la marca. Ojo a la diferencia con `resume()`,
       // que conserva mesa y reloj porque allí NO se empieza de nuevo, se corrige.
       this.startedAt = this.now();
+      this.pausadoEn = 0;
       this.attempts = 0;
     } else {
       this.state = { phase: 'menu', operation: null, tray: [], result: null };

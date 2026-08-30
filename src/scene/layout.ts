@@ -198,10 +198,30 @@ export function distanceToFootprint(
   return Math.hypot(dx - ax * t, dz - az * t);
 }
 
+/**
+ * Cuándo el panel del HUD deja de estar en el lateral y baja a la franja inferior.
+ *
+ * Vive aquí, con el resto de medidas, porque la usan DOS sitios que tienen que decir lo mismo: el CSS
+ * la aplica para mover el panel y `fitCamera()` la consulta para saber si tiene que reservarle sitio
+ * a la derecha. Antes era el número 640 escrito a mano en cada uno; si alguien cambiaba solo el CSS,
+ * la cámara seguía encuadrando para dejar hueco a un panel que ya no estaba ahí.
+ *
+ * Debe coincidir LITERALMENTE con la `@media` de `styles.css`.
+ */
+export const CONSULTA_PANEL_ABAJO = '(max-width: 640px)';
+
 export const CAMERA = {
   position: [0, 2.35, 1.15] as const,
   target: [0, 0.88, -0.35] as const,
   baseFovDeg: 46,
+  /**
+   * Tope del campo de visión. Por encima el encuadre se deforma y los instrumentos quedan diminutos.
+   *
+   * Que este tope se alcance significa que el área jugable NO cabe en la ventana. No es un detalle
+   * estético: medido, en un móvil en vertical el borde izquierdo de la bandeja se va a x=-0,67, o sea
+   * a dos tercios de pantalla fuera. Por eso `fitCamera()` avisa cuando recorta, y quien lo escucha
+   * pide girar el dispositivo en lugar de dejar jugar con media mesa invisible.
+   */
   maxFovDeg: 62,
   /** Fracción del ancho que ocupa el panel del HUD por la derecha. */
   hudReserveX: 0.3,

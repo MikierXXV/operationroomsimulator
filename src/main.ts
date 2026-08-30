@@ -8,6 +8,7 @@ import { Progress } from './engine/Progress';
 import { CREDITO_SALA } from './scene/room';
 import { Hud } from './ui/Hud';
 import { InstrumentInspector } from './ui/InstrumentInspector';
+import { OrientationGate } from './ui/OrientationGate';
 import type { EngineState, InputStatus, Pointer } from './types/contracts';
 
 const canvas = document.getElementById('scene') as HTMLCanvasElement;
@@ -284,7 +285,17 @@ function frame(): void {
    * imprevisible, porque el agarre proyecta el puntero sobre el plano de la mesa y esa proyección
    * cambia en cada frame mientras la cámara viaja.
    */
-  if (scene.isIntroPlaying()) {
+  if (girarAviso.estaTapado()) {
+    /*
+     * Con el aviso de girar puesto no se interactúa con nada.
+     *
+     * La capa ya se traga las pulsaciones del DOM, pero los punteros de la MANO no pasan por el DOM:
+     * llegan de la cámara directamente al agarre. Sin este corte se podrían seguir moviendo
+     * instrumentos a ciegas por detrás del aviso.
+     */
+    handUi.reposo();
+    scene.clearCursors();
+  } else if (scene.isIntroPlaying()) {
     handUi.reposo();
     /*
      * Con las manos, un pellizco NUEVO corta la apertura. El matiz de «nuevo» es lo que hace que la
@@ -309,6 +320,22 @@ function frame(): void {
   scene.render();
   requestAnimationFrame(frame);
 }
+
+/*
+ * Aviso de girar el dispositivo.
+ *
+ * Se le pasa `encuadreCompleto` como pregunta, no un umbral de anchura: lo que impide jugar es que la
+ * mesa no quepa, y de eso el único que sabe es quien calcula el encuadre. Ver `ui/OrientationGate.ts`.
+ */
+const girarAviso = new OrientationGate(appRoot, () => scene.encuadreCompleto(), {
+  onCambio(tapado) {
+    // El cronómetro se puntúa y se guarda: dejarlo correr bajo el aviso arruinaría la marca de quien
+    // gire el teléfono a mitad de partida.
+    if (tapado) engine.pausarReloj();
+    else engine.reanudarReloj();
+    hud.render(engine.getState());
+  },
+});
 
 // --- Arranque -------------------------------------------------------------
 

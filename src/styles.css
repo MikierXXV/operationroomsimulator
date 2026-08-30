@@ -110,7 +110,10 @@ html, body {
   top: 50%; right: 20px;
   transform: translateY(-50%);
   width: min(320px, 30vw);
-  max-height: 82vh;
+  /* `dvh` y no `vh`: en un navegador móvil la barra de direcciones se pliega y se despliega, y `vh`
+     mide siempre contra el viewport GRANDE, así que con la barra visible el panel rebasaba la parte
+     que de verdad se ve. `dvh` sigue al viewport real. */
+  max-height: 82dvh;
   overflow-y: auto;
   background: var(--panel);
   border: 1px solid var(--panel-border);
@@ -154,7 +157,7 @@ html, body {
   height: fit-content;
   /* Ya no hay que descontar la webcam: en la derecha no está. Se mantiene el techo del panel normal
      para que con los historiales desplegados no rebase la ventana. */
-  max-height: 82vh;
+  max-height: 82dvh;
 }
 .hud-panel h2 { margin: 0 0 6px; font-size: 20px; }
 .hud-dim { color: var(--text-dim); font-size: 13px; margin: 0 0 14px; }
@@ -367,7 +370,7 @@ html, body {
 }
 .hud-modal {
   width: min(460px, 88vw);
-  max-height: 88vh;
+  max-height: 88dvh;
   overflow-y: auto;
   background: var(--panel);
   border: 1px solid var(--panel-border);
@@ -543,7 +546,7 @@ html, body {
  */
 .inspector-escape {
   position: absolute;
-  top: max(16px, 8vh);
+  top: max(16px, 8dvh);
   left: 50%;
   transform: translateX(-50%);
   display: none;
@@ -590,11 +593,154 @@ html, body {
   transform: scale(1.12);
 }
 
+/* La consulta tiene que coincidir LITERALMENTE con `CONSULTA_PANEL_ABAJO` en `scene/layout.ts`:
+   `fitCamera()` la usa para saber si reserva franja derecha para el panel. Si divergen, la cámara
+   encuadra dejando hueco a un panel que ya no está ahí. */
 @media (max-width: 640px) {
-  .hud-panel { width: calc(100vw - 32px); left: 16px; right: auto; top: auto; bottom: 16px; transform: none; max-height: 46vh; }
+  .hud-panel { width: calc(100vw - 32px); left: 16px; right: auto; top: auto; bottom: 16px; transform: none; max-height: 46dvh; }
   /* Aquí el panel ocupa TODA la franja inferior, así que la esquina de siempre deja de existir: la
      vista previa sube al hueco que libera el panel de créditos, que en móvil se oculta. */
-  #webcam { width: 120px; top: 56px; bottom: auto; max-height: 25vh; }
+  #webcam { width: 120px; top: 56px; bottom: auto; max-height: 25dvh; }
   /* `.hud-menu` ya no necesita excepción: al no tocar la posición, hereda la del panel de arriba. */
   .hud-credits { display: none; }
+}
+
+/* ---- Pantallas BAJAS: un móvil tumbado ----
+ *
+ * 500 px de alto y no un ancho: un móvil en horizontal mide entre 667 y 932 px de ancho, así que la
+ * consulta de arriba —pensada para el vertical— no lo pilla, y con razón: ahí el panel lateral SÍ
+ * cabe y es lo que queremos. Lo que escasea es la altura.
+ *
+ * Todo lo de aquí está medido a 667×375, un iPhone SE tumbado.
+ */
+@media (max-height: 500px) {
+  /* El panel se ceñía a 82dvh y aun así los dos botones en fila no cabían en 253 px de ancho:
+     «Cambiar nivel» salía partido en dos líneas. En columna caben enteros. */
+  .hud-actions { flex-direction: column; }
+  .hud-actions .hud-btn { flex: none; width: 100%; }
+
+  .hud-panel { max-height: calc(100dvh - 24px); padding: 12px 14px; }
+  .hud-panel h2 { font-size: 17px; }
+  .hud-dim { margin-bottom: 8px; }
+
+  /* La vista previa tapaba la bandeja: vive en la esquina inferior izquierda, justo sobre la zona
+     donde se sueltan los instrumentos. Con poca altura se encoge y se pega al borde. */
+  #webcam { width: 96px; max-height: 84px; left: 8px; bottom: 8px; }
+
+  /* Los créditos se comen la esquina superior izquierda, que aquí es mesa jugable. */
+  .hud-credits { display: none; }
+
+  .hud-topbar { padding: 6px 12px; }
+  .hud-title { font-size: 14px; }
+
+  /* El único botón de la barra superior medía 41 px. La regla de `pointer: coarse` de más abajo lo
+     cubre en un móvil de verdad, pero una ventana de 500 px de alto o menos es un teléfono tumbado
+     con tanta probabilidad que no merece la pena distinguir. */
+  .hud-toggle { min-height: 44px; }
+
+}
+
+/*
+ * El cartel de gestos NO puede invadir el panel.
+ *
+ * Va abajo y centrado sobre el ancho completo, con `white-space: nowrap`. Medido a 667×375 se
+ * solapaba con el panel lateral. Se le acota el ancho a la franja libre que queda a su izquierda:
+ * el panel ocupa `min(320px, 30vw)` más 20 px de separación.
+ */
+@media (min-width: 641px) {
+  .gestos-aviso {
+    left: 0;
+    right: calc(min(320px, 30vw) + 28px);
+    transform: none;
+    /* `fit-content` es imprescindible: fijando `left` y `right` a la vez, el elemento se ESTIRA para
+       cubrir el hueco y la píldora se convertía en una barra de lado a lado. Con esto vuelve a
+       medir lo que mide el texto, y `margin: auto` la centra en la franja libre. */
+    width: fit-content;
+    margin: 0 auto;
+    max-width: calc(100vw - min(320px, 30vw) - 56px);
+  }
+}
+
+/*
+ * En pantalla baja el cartel ni cabe en una línea ni puede empezar en el borde.
+ *
+ * Con `nowrap` se cortaba a media frase contra el panel —se leía «Dos de…»— y encima se montaba sobre
+ * la vista previa de la webcam, que vive en la esquina inferior izquierda. Se le deja envolver en dos
+ * líneas y arranca pasada la webcam. Enseña los gestos: cortado no sirve de nada.
+ *
+ * Va DESPUÉS del bloque de `min-width` a propósito: un móvil tumbado cumple las dos consultas, y a
+ * igual especificidad manda la última. Si se sube, `left: 0` vuelve a ganar y el cartel se pega otra
+ * vez a la vista previa.
+ */
+@media (max-height: 500px) {
+  .gestos-aviso {
+    left: 112px;
+    bottom: 10px;
+    white-space: normal;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.3;
+    padding: 7px 12px;
+    border-radius: 14px;
+  }
+}
+
+/*
+ * ---- Dianas táctiles ----
+ *
+ * `pointer: coarse` es «se apunta con el dedo», que es la condición real, no «es un móvil».
+ *
+ * Los tamaños grandes ya existían bajo `#hud.modo-manos`, pero solo se aplican con la cámara activa.
+ * Quien deniegue el permiso —bastante probable en un teléfono— cae a modo ratón, y ahí `.hud-toggle`
+ * vuelve a medir 41 px de alto, por debajo de los 44 que se consideran mínimo cómodo para un dedo.
+ */
+@media (pointer: coarse) {
+  .hud-btn { min-height: 48px; }
+  .hud-toggle { min-height: 44px; padding: 10px 14px; }
+  .hud-check { min-height: 44px; }
+  .hud-opcard { padding: 16px; }
+  .hud-historial summary { padding: 8px 0; }
+  .inspector-close { width: 44px; height: 44px; }
+}
+
+/*
+ * ---- Aviso de girar el dispositivo ----
+ *
+ * Tapa entero y por encima de todo, incluidos modales e inspector: mientras esté puesto no hay
+ * partida que valer la pena tocar, porque media mesa está fuera de la pantalla. Ver
+ * `ui/OrientationGate.ts` para por qué se decide por el encuadre y no por el tipo de aparato.
+ */
+.girar-aviso {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bg);
+  /* Reactiva los eventos para TRAGÁRSELOS: es lo que impide seguir jugando a ciegas por debajo. */
+  pointer-events: auto;
+}
+.girar-aviso.visible { display: flex; }
+.girar-caja { text-align: center; max-width: 340px; }
+.girar-icono {
+  font-size: 56px;
+  line-height: 1;
+  margin-bottom: 14px;
+  display: inline-block;
+  animation: girar-gesto 2.4s ease-in-out infinite;
+}
+.girar-aviso h2 { margin: 0 0 10px; font-size: 22px; }
+.girar-aviso p { margin: 0 0 8px; color: var(--text-dim); font-size: 15px; line-height: 1.45; }
+.girar-alternativa { font-size: 13px; opacity: 0.75; }
+
+/* El icono gira hasta la horizontal y vuelve: enseña el gesto que se pide en lugar de describirlo. */
+@keyframes girar-gesto {
+  0%, 30% { transform: rotate(0deg); }
+  55%, 80% { transform: rotate(90deg); }
+  100% { transform: rotate(0deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .girar-icono { animation: none; transform: rotate(90deg); }
 }

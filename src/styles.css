@@ -633,10 +633,21 @@ html, body {
   .hud-topbar { padding: 6px 12px; }
   .hud-title { font-size: 14px; }
 
-  /* El único botón de la barra superior medía 41 px. La regla de `pointer: coarse` de más abajo lo
-     cubre en un móvil de verdad, pero una ventana de 500 px de alto o menos es un teléfono tumbado
-     con tanta probabilidad que no merece la pena distinguir. */
+  /*
+   * Dianas de dedo, también en modo ratón.
+   *
+   * Los estilos de `#hud.modo-manos` ya agrandan estos botones, pero solo con la cámara activa. Quien
+   * deniegue el permiso —bastante probable en un teléfono— cae a modo ratón, y ahí «He terminado» y
+   * «Cambiar nivel», que son LOS botones del juego, se quedaban en 38 px; el de la barra, en 41. El
+   * mínimo cómodo para un dedo son 44.
+   *
+   * La regla de `pointer: coarse` de más abajo cubre lo mismo en un móvil de verdad, pero no se puede
+   * ejercitar desde un navegador de escritorio. Esta sí, y una ventana de 500 px de alto o menos es
+   * un teléfono tumbado con tanta probabilidad que no merece la pena distinguir.
+   */
   .hud-toggle { min-height: 44px; }
+  .hud-btn { min-height: 46px; }
+  .hud-check { min-height: 44px; }
 
 }
 

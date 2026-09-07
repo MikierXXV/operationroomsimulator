@@ -6,6 +6,7 @@ import type {
   Instrument,
   Operation,
 } from '../types/contracts';
+import { desplazamientoARestaurar, type DesplazamientoGuardado } from './hudScroll';
 
 const STATUS_LABEL: Record<InputStatus, string> = {
   idle: 'Iniciando…',
@@ -145,6 +146,18 @@ export class Hud {
   }
 
   render(state: EngineState | null): void {
+    /*
+     * Se anota dónde estaba la lista ANTES de tirar el HUD.
+     *
+     * Rehacer el panel con `innerHTML = ''` devuelve el desplazamiento a cero, y con la bandeja llena
+     * eso obliga a bajar 686 px otra vez solo para confirmar «He terminado». Se toma aquí, antes de
+     * pisar `lastState`, porque hace falta la fase VIEJA para saber si la nueva es la misma pantalla.
+     */
+    const panelPrevio = this.root.querySelector('.hud-panel');
+    const guardado: DesplazamientoGuardado | null = panelPrevio
+      ? { fase: this.lastState?.phase ?? 'menu', scrollTop: panelPrevio.scrollTop }
+      : null;
+
     this.lastState = state;
     this.timerEl = null;
     this.arrancarCronometro();
@@ -163,6 +176,16 @@ export class Hud {
 
     if (this.mode === 'hands') this.root.appendChild(this.avisoGestos(state));
     if (this.credited.length || this.sceneCredit) this.root.appendChild(this.credits());
+
+    // Y se devuelve al sitio, ya con el panel nuevo medido. Ver `hudScroll.ts`.
+    const panelNuevo = this.root.querySelector('.hud-panel');
+    if (panelNuevo) {
+      panelNuevo.scrollTop = desplazamientoARestaurar(
+        guardado,
+        state?.phase ?? 'menu',
+        panelNuevo.scrollHeight - panelNuevo.clientHeight,
+      );
+    }
   }
 
   /**

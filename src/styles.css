@@ -538,32 +538,58 @@ html, body {
 }
 
 /*
- * Cartel de cierre, sobre el fondo y fuera del panel.
+ * ---- Franjas de salida, a los lados del panel ----
  *
- * Con manos, cerrar era lo único del visor que no se adivinaba: la instrucción vivía en la pista
- * gris de abajo, dentro del recuadro, y el gesto hay que hacerlo fuera. Aquí está en el sitio donde
- * se actúa, y el borde discontinuo dice sin palabras que «fuera» es zona activa.
+ * Aquí vivía un cartel centrado ARRIBA que decía «pellizca aquí fuera para cerrar». En pantalla
+ * ancha sobraba hueco arriba y acertaba, pero en un móvil tumbado el panel no cabe —464 px de alto
+ * en una ventana de 375— y el cartel acababa dibujado SOBRE el panel, señalando un punto donde
+ * pellizcar gira el modelo en vez de cerrarlo. Indicaba lo contrario de lo que hacía.
+ *
+ * El hueco libre está a los lados —medido: 94 px a la izquierda, 93 a la derecha— y es justo donde
+ * el pellizco cierra. Se marcan esas dos franjas y se quita el cartel.
+ *
+ * `pointer-events: none` NO es opcional. El cierre por clic comprueba `e.target === this.overlay`;
+ * si la franja pudiera recibir el clic, sería ella la diana y el visor dejaría de cerrarse al tocar
+ * el fondo. Las franjas solo señalan: quien cierra es el overlay que tienen debajo.
  */
-.inspector-escape {
+.inspector-salida {
   position: absolute;
-  top: max(16px, 8dvh);
-  left: 50%;
-  transform: translateX(-50%);
+  top: 8px;
+  bottom: 8px;
+  /*
+   * Ocupa el hueco que queda al lado del panel, no una barra de ancho fijo pegada al borde.
+   *
+   * Con un ancho fijo, en escritorio quedaban dos barras estrechas contra los bordes y 412 px de
+   * vacío entre ellas y el panel —vacío que también cierra—, así que se leían como adornos sueltos
+   * en vez de como la zona que son. Derivándolo del ancho del panel (`min(480px, 86vw)`), la franja
+   * ES el hueco: mide lo que de verdad se puede pellizcar para salir, en cualquier pantalla.
+   */
+  width: max(56px, calc(50% - min(480px, 86vw) / 2 - 18px));
   display: none;
   align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
-  border-radius: 999px;
+  justify-content: center;
   border: 2px dashed var(--accent);
-  background: rgba(6, 14, 18, 0.78);
+  border-radius: 16px;
+  background: rgba(6, 14, 18, 0.55);
   color: var(--text);
-  font-size: 15px;
-  white-space: nowrap;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+  pointer-events: none;
   animation: latido 2.4s ease-in-out infinite;
 }
-.inspector-escape b { color: var(--accent); }
-/* Solo con manos: con ratón, cerrar ya se sabe hacer. */
-.inspector-overlay.manos .inspector-escape { display: flex; }
+.inspector-salida.izq { left: 8px; }
+.inspector-salida.der { right: 8px; }
+
+/*
+ * Se ven con manos —sustituyen al cartel, que solo salía ahí— y también en pantalla baja aunque se
+ * juegue con el dedo: es justo donde la ✕ del panel queda fuera de la pantalla, así que sin esto no
+ * habría ninguna salida a la vista.
+ */
+.inspector-overlay.manos .inspector-salida { display: flex; }
+@media (max-height: 500px) {
+  .inspector-overlay.open .inspector-salida { display: flex; }
+}
 
 @keyframes latido {
   0%, 100% { opacity: 0.85; }

@@ -44,15 +44,24 @@ export class InstrumentInspector {
     this.overlay = document.createElement('div');
     this.overlay.className = 'inspector-overlay interactive';
     /*
-     * El cartel de cierre va FUERA del panel, no dentro.
+     * La salida se señala en las FRANJAS LATERALES, no con un cartel encima del panel.
      *
-     * La instrucción «pellizca fuera para cerrar» estaba en la pista de abajo, dentro del recuadro,
-     * en gris y a 12 px: se leía tarde o no se leía. Puesta sobre el fondo oscuro y justo encima del
-     * panel, la instrucción está donde hay que hacer el gesto, que es la única forma de que se
-     * entienda sin leerla entera.
+     * Antes había un cartel arriba que decía «pellizca aquí fuera para cerrar». En una pantalla ancha
+     * sobraba sitio arriba y funcionaba, pero en un móvil tumbado no: medido a 667×375, el panel mide
+     * 464 px de alto y no cabe —se corta 45 px por arriba y otros 45 por abajo—, así que el cartel
+     * acababa dibujado SOBRE el panel, señalando un punto donde pellizcar en realidad gira el modelo.
+     * La indicación decía justo lo contrario de lo que hacía.
+     *
+     * El hueco libre está a los lados: 94 px a la izquierda y 93 a la derecha. Ahí es donde el
+     * pellizco cierra de verdad, así que ahí es donde se dibuja la salida.
+     *
+     * Las franjas NO llevan lógica: pellizcar fuera del panel ya cerraba y hacer clic en el fondo
+     * también. Solo enseñan dónde. Por eso van con `pointer-events: none` en el CSS; sin eso, un clic
+     * sobre la franja tendría como diana la franja y no el overlay, y el cierre por clic —que
+     * comprueba `e.target === this.overlay`— dejaría de funcionar.
      */
     this.overlay.innerHTML = `
-      <div class="inspector-escape">🤏 Pellizca <b>aquí fuera</b> para cerrar</div>
+      <div class="inspector-salida izq" aria-hidden="true"><span>🤏<br>Salir</span></div>
       <div class="inspector-panel">
         <button class="inspector-close" aria-label="Cerrar">✕</button>
         <canvas class="inspector-canvas"></canvas>
@@ -60,6 +69,7 @@ export class InstrumentInspector {
         <div class="inspector-desc"></div>
         <div class="inspector-hint">Arrastra para girar</div>
       </div>
+      <div class="inspector-salida der" aria-hidden="true"><span>🤏<br>Salir</span></div>
       <div class="inspector-hand" hidden></div>`;
     root.appendChild(this.overlay);
 
